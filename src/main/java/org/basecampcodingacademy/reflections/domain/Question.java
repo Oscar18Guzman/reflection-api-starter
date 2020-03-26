@@ -1,7 +1,7 @@
 package org.basecampcodingacademy.reflections.domain;
 
-public class Question {
 
+public class Question {
     public Integer id;
     public String prompt;
     public Integer reflectionId;

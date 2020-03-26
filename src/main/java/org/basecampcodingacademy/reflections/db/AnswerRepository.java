@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
 @Repository
 public class AnswerRepository {
     @Autowired
@@ -18,31 +17,37 @@ public class AnswerRepository {
         return jdbc.query("SELECT id, responseId, questionId, content FROM answers", this::mapper);
     }
 
+    public Answer findone(Integer id) {
+        return jdbc.queryForObject("SELECT id, responseId, questionId, content FROM answers WHERE id = ?", this::mapper, id);
+    }
+
     public Answer create(Answer answer) {
+        var sql = "INSERT INTO answers (responseId, content) VALUES (?, ?) RETURNING *";
         return jdbc.queryForObject(
-                "INSERT INTO answers (questionId, responseId, content) VALUES (?, ?, ?) RETURNING id, responseId, questionId, content",
+                sql,
                 this::mapper,
-                answer.questionId,
                 answer.responseId,
                 answer.content
-
         );
     }
 
-    public List<Answer> find(Answer answer) {
-        return jdbc.query("SELECT id, responseId, questionId, content FROM answers WHERE responseId = ?", this::mapper, answer.responseId);
+    public Answer find(Integer id) {
+        return jdbc.queryForObject(
+                "SELECT id, responseId, questionId, content FROM answers WHERE id = ?",
+                this::mapper,
+                id);
     }
+
 
     public Answer update(Answer answer) {
         return jdbc.queryForObject(
-                "UPDATE answers SET content = ? WHERE id = ? RETURNING id, responseId, questionId, content",
+                "UPDATE answers SET content = ? WHERE id = ? RETURNING *",
                 this::mapper, answer.content, answer.id);
     }
 
     public void delete(Integer id) {
-        jdbc.query("DELETE FROM answers WHERE id = ? RETURNING id, responseId, questionId", this::mapper, id);
+        jdbc.query("DELETE FROM answers WHERE id = ? RETURNING id, responseId, questionId, content", this::mapper, id);
     }
-
     private Answer mapper(ResultSet resultSet, int i) throws SQLException {
         return new Answer(
                 resultSet.getInt("id"),
@@ -51,4 +56,5 @@ public class AnswerRepository {
                 resultSet.getString("content")
         );
     }
+
 }

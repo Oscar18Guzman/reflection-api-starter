@@ -9,14 +9,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+
 public class AnswerController {
     @Autowired
     public AnswerRepository answers;
 
     @GetMapping("/responses/{responseId}/answers")
-    public List<Answer> index(Answer answer, @PathVariable Integer responseId) {
-        answer.responseId = responseId;
-        return (List<Answer>) answers.find(answer);
+    public List<Answer> index() {
+        return answers.all();
+    }
+
+    @GetMapping("/answers/{id}")
+    public Answer index(@PathVariable Integer id) {
+        return answers.findone(id);
     }
 
     @PostMapping("/responses/{responseId}/answers")
@@ -32,9 +37,12 @@ public class AnswerController {
         return answers.update(answer);
     }
 
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Integer id) {
         answers.delete(id);
     }
+
+
 }
