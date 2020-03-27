@@ -1,60 +1,55 @@
 package org.basecampcodingacademy.reflections.controllers;
 
+import org.basecampcodingacademy.reflections.db.AnswerRepository;
+import org.basecampcodingacademy.reflections.db.QuestionRepository;
+import org.basecampcodingacademy.reflections.db.ReflectionRepository;
+import org.basecampcodingacademy.reflections.domain.Answer;
 import org.basecampcodingacademy.reflections.domain.Reflection;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
-@Repository
+@RestController
+@RequestMapping("/reflections")
 public class ReflectionController {
     @Autowired
-    public JdbcTemplate jdbc;
+    public ReflectionRepository reflections;
+    @Autowired
+    public QuestionRepository questions;
 
-    public List<Reflection> all() {
-        return jdbc.query("SELECT id, date FROM reflections", this::mapper);
+    @GetMapping
+    public List<Reflection> index() {
+        return reflections.all();
     }
 
-    public Reflection create(Reflection reflection) {
-        return jdbc.queryForObject(
-                "INSERT INTO reflections (date) VALUES (?) RETURNING id, date",
-                this::mapper,
-                reflection.date
-        );
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Reflection create(@RequestBody Reflection reflection) {
+        return reflections.create(reflection);
     }
 
-    public Reflection find(LocalDate localDate) {
-        try {
-            return jdbc.queryForObject("SELECT id, date FROM reflections WHERE date = ? LIMIT 1", this::mapper, localDate);
-        } catch (EmptyResultDataAccessException ex) {
-            return null;
+    @GetMapping("/today")
+    public Reflection today(@RequestParam(defaultValue = "") String include) {
+        var reflection = reflections.find(LocalDate.now());
+        if (include.equals("questions")) {
+            reflection.questions = questions.forReflection(reflection.id);
         }
+        return reflection;
     }
 
-    public Reflection find(Integer id) {
-        return jdbc.queryForObject("SELECT id, date FROM reflections WHERE id = ?", this::mapper, id);
+
+    @PatchMapping("/{id}")
+    public Reflection update(@PathVariable Integer id, @RequestBody Reflection reflection) {
+        reflection.id = id;
+        return reflections.update(reflection);
     }
 
-    public Reflection update(Reflection reflection) {
-        return jdbc.queryForObject(
-                "UPDATE reflections SET date = ? WHERE id = ? RETURNING id, date",
-                this::mapper, reflection.date, reflection.id);
-    }
-
-    public void delete(Integer id) {
-        jdbc.query("DELETE FROM reflections WHERE id = ? RETURNING id, date", this::mapper, id);
-    }
-
-    private Reflection mapper(ResultSet resultSet, int i) throws SQLException {
-        return new Reflection(
-                resultSet.getInt("id"),
-                resultSet.getDate("date").toLocalDate(),
-                null
-        );
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Integer id) {
+        reflections.delete(id);
     }
 }

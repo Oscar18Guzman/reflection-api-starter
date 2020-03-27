@@ -10,7 +10,7 @@ public class Reflection {
     public Integer id;
     @JsonFormat(pattern = "yyyy-MM-dd")
     public LocalDate date;
-    public List<Question> questions;
+    public List<Question> questions; // You will have to change this line eventually
 
     public Reflection() {
     }

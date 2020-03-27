@@ -1,6 +1,7 @@
 package org.basecampcodingacademy.reflections.db;
 
 import org.basecampcodingacademy.reflections.domain.Answer;
+import org.basecampcodingacademy.reflections.domain.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -8,17 +9,20 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
 @Repository
 public class AnswerRepository {
     @Autowired
     public JdbcTemplate jdbc;
 
-    public List<Answer> all() {
-        return jdbc.query("SELECT id, responseId, questionId, content FROM answers", this::mapper);
-    }
-
     public Answer findone(Integer id) {
         return jdbc.queryForObject("SELECT id, responseId, questionId, content FROM answers WHERE id = ?", this::mapper, id);
+    }
+
+    public List<Answer> forResponse(Integer responseId) {
+        return jdbc.query(
+                "SELECT * FROM answers WHERE responseId = ?", this::mapper, responseId
+        );
     }
 
     public Answer create(Answer answer) {
@@ -30,6 +34,7 @@ public class AnswerRepository {
                 answer.content
         );
     }
+
 
     public Answer find(Integer id) {
         return jdbc.queryForObject(

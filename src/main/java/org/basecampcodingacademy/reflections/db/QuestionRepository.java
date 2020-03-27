@@ -1,22 +1,22 @@
 package org.basecampcodingacademy.reflections.db;
 
 import org.basecampcodingacademy.reflections.domain.Question;
+import org.basecampcodingacademy.reflections.domain.Question;
+import org.basecampcodingacademy.reflections.domain.Reflection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
-
 @Repository
 public class QuestionRepository {
     @Autowired
     public JdbcTemplate jdbc;
 
-    public List<Question> all() {
-        return jdbc.query("SELECT id, prompt, reflectionId FROM questions", this::mapper);
-    }
 
     public List<Question> forReflection(Integer reflectionId) {
         return jdbc.query(
@@ -24,9 +24,11 @@ public class QuestionRepository {
         );
     }
 
+
     public Question create(Question question) {
+        var sql = "INSERT INTO questions (prompt, reflectionId) VALUES (?, ?) RETURNING *";
         return jdbc.queryForObject(
-                "INSERT INTO questions (prompt, reflectionId) VALUES (?, ?) RETURNING id, prompt, reflectionId",
+                sql,
                 this::mapper,
                 question.prompt,
                 question.reflectionId
@@ -36,6 +38,7 @@ public class QuestionRepository {
     public Question find(Integer id) {
         return jdbc.queryForObject("SELECT id, prompt, reflectionId FROM questions WHERE id = ?", this::mapper, id);
     }
+
 
     public Question update(Question question) {
         return jdbc.queryForObject(
