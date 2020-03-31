@@ -14,6 +14,11 @@ public class QuestionController {
     @Autowired
     public QuestionRepository questions;
 
+    @GetMapping
+    public List<Question> index() {
+        return questions.all();
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public Question create(@RequestBody Question question, @PathVariable Integer reflectionId) {

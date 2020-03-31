@@ -57,4 +57,8 @@ public class QuestionRepository {
                 resultSet.getInt("reflectionId")
         );
     }
+
+    public List<Question> all() {
+        return jdbc.query("SELECT id, prompt, reflectionId FROM questions", this::mapper);
+    }
 }
