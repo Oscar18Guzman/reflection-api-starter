@@ -14,6 +14,12 @@ public class AnswerController {
     @Autowired
     public AnswerRepository answers;
 
+    @GetMapping("/responses/{responseId}/answers")
+    public List<Answer> index(Answer answer, @PathVariable Integer responseId) {
+        answer.responseId = responseId;
+        return (List<Answer>) answers.findAllForResponse(answer);
+    }
+
 
     @GetMapping("/answers/{id}")
     public Answer index(@PathVariable Integer id) {

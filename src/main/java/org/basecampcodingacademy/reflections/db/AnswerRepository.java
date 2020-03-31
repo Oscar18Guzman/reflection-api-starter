@@ -53,6 +53,7 @@ public class AnswerRepository {
     public void delete(Integer id) {
         jdbc.query("DELETE FROM answers WHERE id = ? RETURNING id, responseId, questionId, content", this::mapper, id);
     }
+
     private Answer mapper(ResultSet resultSet, int i) throws SQLException {
         return new Answer(
                 resultSet.getInt("id"),
@@ -62,4 +63,7 @@ public class AnswerRepository {
         );
     }
 
+    public List<Answer> findAllForResponse(Answer answer) {
+        return jdbc.query("SELECT id, responseId, questionId, content FROM answers WHERE responseId = ?", this::mapper, answer.responseId);
+    }
 }
