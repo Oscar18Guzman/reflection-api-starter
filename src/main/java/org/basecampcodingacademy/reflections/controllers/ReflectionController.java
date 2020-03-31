@@ -1,5 +1,7 @@
 package org.basecampcodingacademy.reflections.controllers;
 
+import org.basecampcodingacademy.reflections.OneReflectionPerDay;
+import org.basecampcodingacademy.reflections.ResponseForNonExistingReflection;
 import org.basecampcodingacademy.reflections.db.AnswerRepository;
 import org.basecampcodingacademy.reflections.db.QuestionRepository;
 import org.basecampcodingacademy.reflections.db.ReflectionRepository;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/reflections")
@@ -27,8 +30,11 @@ public class ReflectionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Reflection create(@RequestBody Reflection reflection) {
-        return reflections.create(reflection);
+    public Reflection create(@RequestBody Reflection reflection) throws OneReflectionPerDay {
+        if (Objects.isNull(reflections.find(reflection.date))) {
+            return reflections.create(reflection);
+        }
+        throw new OneReflectionPerDay(reflection.date);
     }
 
     @GetMapping("/today")
